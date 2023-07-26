@@ -284,3 +284,20 @@ div#archive {
   background: rgba(25, 25, 25, 0.9) !important;
   color: #ffffff;
 }
+
+/* 图标大小 */
+svg.menu_icon {
+  width: 1.50em;
+  height: 1.50em;
+  vertical-align: -0.15em;
+  fill: currentColor;
+  overflow: hidden;
+}
+
+svg.social_icon {
+  width: 1.0em;
+  height: 1.0em;
+  vertical-align: -0.15em;
+  fill: currentColor;
+  overflow: hidden;
+}
