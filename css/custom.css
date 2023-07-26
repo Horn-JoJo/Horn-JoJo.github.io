@@ -286,7 +286,7 @@ div#archive {
 }
 
 /* 图标大小 */
-svg.menu_icon {
+/* svg.menu_icon {
   width: 1.28em;
   height: 1.28em;
   vertical-align: -0.15em;
@@ -300,4 +300,11 @@ svg.social_icon {
   vertical-align: -0.15em;
   fill: currentColor;
   overflow: hidden;
-}
+} */
+svg.social_icon {
+  width: 1.28em;
+  height: 1.28em;
+  vertical-align: -0.15em;
+  fill: currentColor;
+  overflow: hidden;
+} 
