@@ -1,0 +1,403 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>字节（内存）对齐 | kuroko's blog</title><meta name="author" content="Horn JoJo"><meta name="copyright" content="Horn JoJo"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="ffffff"><meta name="description" content="一、一般字节对齐 各个数据类型需要按照一定规则存放到存储单元中，相邻的数据并不一定是连续的紧紧挨在一起的，两个object之间可能会有空隙。这个空隙是padding。**变量存的起始地址必须具备某种特性-‘对齐’，如4字节的int类型的起始地址，应该位于4字节的边界上，即起始地址能被4整除。  为什么需要字节对齐?  不同硬件平台的对存储空间的处理上存在不同。 尽可能保证一次取数的完整性，以便提升">
+<meta property="og:type" content="article">
+<meta property="og:title" content="字节（内存）对齐">
+<meta property="og:url" content="http://kuroko.love/2023/08/13/%E8%AE%A1%E7%AE%97%E5%86%85%E5%AD%98%E5%A4%A7%E5%B0%8F/index.html">
+<meta property="og:site_name" content="kuroko&#39;s blog">
+<meta property="og:description" content="一、一般字节对齐 各个数据类型需要按照一定规则存放到存储单元中，相邻的数据并不一定是连续的紧紧挨在一起的，两个object之间可能会有空隙。这个空隙是padding。**变量存的起始地址必须具备某种特性-‘对齐’，如4字节的int类型的起始地址，应该位于4字节的边界上，即起始地址能被4整除。  为什么需要字节对齐?  不同硬件平台的对存储空间的处理上存在不同。 尽可能保证一次取数的完整性，以便提升">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://picbed.kuroko.love/blog_background/%E9%A3%9F%E8%9C%82%E6%93%8D%E7%A5%882.jpg">
+<meta property="article:published_time" content="2023-08-13T07:15:04.000Z">
+<meta property="article:modified_time" content="2023-08-14T14:35:27.402Z">
+<meta property="article:author" content="Horn JoJo">
+<meta property="article:tag" content="字节对齐">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://picbed.kuroko.love/blog_background/%E9%A3%9F%E8%9C%82%E6%93%8D%E7%A5%882.jpg"><link rel="shortcut icon" href="/asserts/kuroko.png"><link rel="canonical" href="http://kuroko.love/2023/08/13/%E8%AE%A1%E7%AE%97%E5%86%85%E5%AD%98%E5%A4%A7%E5%B0%8F/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox/fancybox.min.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","preload":true,"top_n_per_article":1,"unescape":false,"languages":{"hits_empty":"找不到您查询的内容：${query}","hits_stats":"共找到 ${hits} 篇文章"}},
+  translate: {"defaultEncoding":2,"translateDelay":0,"msgToTraditionalChinese":"繁","msgToSimplifiedChinese":"简"},
+  noticeOutdate: {"limitDay":365,"position":"top","messagePrev":"It has been","messageNext":"days since the last update, the content of the article may be outdated."},
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":230},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: true,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  source: {
+    justifiedGallery: {
+      js: 'https://cdn.jsdelivr.net/npm/flickr-justified-gallery/dist/fjGallery.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/flickr-justified-gallery/dist/fjGallery.min.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: true,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '字节（内存）对齐',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2023-08-14 22:35:27'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+    win.saveToLocal = {
+      set: function setWithExpiry(key, value, ttl) {
+        if (ttl === 0) return
+        const now = new Date()
+        const expiryDay = ttl * 86400000
+        const item = {
+          value: value,
+          expiry: now.getTime() + expiryDay,
+        }
+        localStorage.setItem(key, JSON.stringify(item))
+      },
+
+      get: function getWithExpiry(key) {
+        const itemStr = localStorage.getItem(key)
+
+        if (!itemStr) {
+          return undefined
+        }
+        const item = JSON.parse(itemStr)
+        const now = new Date()
+
+        if (now.getTime() > item.expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return item.value
+      }
+    }
+  
+    win.getScript = url => new Promise((resolve, reject) => {
+      const script = document.createElement('script')
+      script.src = url
+      script.async = true
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    })
+  
+    win.getCSS = (url,id = false) => new Promise((resolve, reject) => {
+      const link = document.createElement('link')
+      link.rel = 'stylesheet'
+      link.href = url
+      if (id) link.id = id
+      link.onerror = reject
+      link.onload = link.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        link.onload = link.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(link)
+    })
+  
+      win.activateDarkMode = function () {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = function () {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', 'ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          if (t === 'dark') activateDarkMode()
+          else if (t === 'light') activateLightMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+    const detectApple = () => {
+      if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+    })(window)</script><link rel="stylesheet" href="/css/custom.css" media="defer" onload="this.media='all'"><!-- hexo injector head_end start --><link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Zfour/Butterfly-double-row-display@1.00/cardlistpost.min.css"/>
+<style>#recent-posts > .recent-post-item >.recent-post-info > .article-meta-wrap > .tags:before {content:"\A";
+  white-space: pre;}#recent-posts > .recent-post-item >.recent-post-info > .article-meta-wrap > .tags > .article-meta__separator{display:none}</style>
+<link rel="stylesheet" href="https://cdn.cbd.int/hexo-butterfly-clock-anzhiyu/lib/clock.min.css" /><link rel="stylesheet" href="https://npm.elemecdn.com/hexo-butterfly-footer-beautify@1.0.0/lib/runtime.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://npm.elemecdn.com/hexo-butterfly-swiper/lib/swiper.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://npm.elemecdn.com/hexo-butterfly-swiper/lib/swiperstyle.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://npm.elemecdn.com/hexo-butterfly-tag-plugins-plus@latest/lib/assets/font-awesome-animation.min.css" media="defer" onload="this.media='all'"><link rel="stylesheet" href="https://npm.elemecdn.com/hexo-butterfly-tag-plugins-plus@latest/lib/tag_plugins.css" media="defer" onload="this.media='all'"><script src="https://npm.elemecdn.com/hexo-butterfly-tag-plugins-plus@latest/lib/assets/carousel-touch.js"></script><link rel="stylesheet" href="https://npm.elemecdn.com/hexo-butterfly-wowjs/lib/animate.min.css" media="print" onload="this.media='screen'"><link rel="stylesheet" href="https://npm.elemecdn.com/hexo-filter-gitcalendar/lib/gitcalendar.css" media="print" onload="this.media='all'"><!-- hexo injector head_end end --><meta name="generator" content="Hexo 5.4.2"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/asserts/kuroko.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">18</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">10</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">8</div></a></div><hr class="custom-hr"/><div class="menus_items"><div class="menus_item"><a class="site-page faa-parent animated-hover" href="/"><i class="fa-fw icon-HOME"></i><svg class="menu_icon faa-tada" aria-hidden="true"><use xlink:href="#icon-HOME"></use></svg><span> 首页</span></a></div><div class="menus_item"><a class="site-page faa-parent animated-hover" href="/archives/"><i class="fa-fw icon-guidang"></i><svg class="menu_icon faa-tada" aria-hidden="true"><use xlink:href="#icon-guidang"></use></svg><span> 归档</span></a></div><div class="menus_item"><a class="site-page faa-parent animated-hover" href="/tags/"><i class="fa-fw icon-tags"></i><svg class="menu_icon faa-tada" aria-hidden="true"><use xlink:href="#icon-tags"></use></svg><span> 标签</span></a></div><div class="menus_item"><a class="site-page faa-parent animated-hover" href="/categories/"><i class="fa-fw icon-fenlei"></i><svg class="menu_icon faa-tada" aria-hidden="true"><use xlink:href="#icon-fenlei"></use></svg><span> 分类</span></a></div><div class="menus_item"><a class="site-page group faa-parent animated-hover hide" href="javascript:void(0);"><svg class="menu_icon faa-tada" aria-hidden="true"><use xlink:href="#icon-liebiao-"></use></svg><span> 列表</span><i class="fas fa-chevron-down"></i></a><ul class="menus_item_child"><li><a class="site-page child faa-parent animated-hover" href="/music/"><svg class="menu_icon faa-tada" aria-hidden="true"><use xlink:href="#icon-yinlehe">                   </use></svg><span> 音乐</span></a></li><li><a class="site-page child faa-parent animated-hover" href="/movies/"><svg class="menu_icon faa-tada" aria-hidden="true"><use xlink:href="#icon-film-full">                   </use></svg><span> 电影</span></a></li></ul></div><div class="menus_item"><a class="site-page faa-parent animated-hover" href="/comments/"><i class="fa-fw icon-TIFFANYSROOM_huaban"></i><svg class="menu_icon faa-tada" aria-hidden="true"><use xlink:href="#icon-TIFFANYSROOM_huaban"></use></svg><span> 留言板</span></a></div><div class="menus_item"><a class="site-page faa-parent animated-hover" href="/link/"><i class="fa-fw icon-feijifenxianglianjie"></i><svg class="menu_icon faa-tada" aria-hidden="true"><use xlink:href="#icon-feijifenxianglianjie"></use></svg><span> 友链</span></a></div><div class="menus_item"><a class="site-page faa-parent animated-hover" href="/about/"><i class="fa-fw icon-xihuan"></i><svg class="menu_icon faa-tada" aria-hidden="true"><use xlink:href="#icon-xihuan"></use></svg><span> 关于</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url('https://picbed.kuroko.love/blog_background/%E9%A3%9F%E8%9C%82%E6%93%8D%E7%A5%882.jpg')"><nav id="nav"><span id="blog-info"><a href="/" title="kuroko's blog"><span class="site-name">kuroko's blog</span></a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search" href="javascript:void(0);"><i class="fas fa-search fa-fw"></i></a></div><div class="menus_items"><div class="menus_item"><a class="site-page faa-parent animated-hover" href="/"><i class="fa-fw icon-HOME"></i><svg class="menu_icon faa-tada" aria-hidden="true"><use xlink:href="#icon-HOME"></use></svg><span> 首页</span></a></div><div class="menus_item"><a class="site-page faa-parent animated-hover" href="/archives/"><i class="fa-fw icon-guidang"></i><svg class="menu_icon faa-tada" aria-hidden="true"><use xlink:href="#icon-guidang"></use></svg><span> 归档</span></a></div><div class="menus_item"><a class="site-page faa-parent animated-hover" href="/tags/"><i class="fa-fw icon-tags"></i><svg class="menu_icon faa-tada" aria-hidden="true"><use xlink:href="#icon-tags"></use></svg><span> 标签</span></a></div><div class="menus_item"><a class="site-page faa-parent animated-hover" href="/categories/"><i class="fa-fw icon-fenlei"></i><svg class="menu_icon faa-tada" aria-hidden="true"><use xlink:href="#icon-fenlei"></use></svg><span> 分类</span></a></div><div class="menus_item"><a class="site-page group faa-parent animated-hover hide" href="javascript:void(0);"><svg class="menu_icon faa-tada" aria-hidden="true"><use xlink:href="#icon-liebiao-"></use></svg><span> 列表</span><i class="fas fa-chevron-down"></i></a><ul class="menus_item_child"><li><a class="site-page child faa-parent animated-hover" href="/music/"><svg class="menu_icon faa-tada" aria-hidden="true"><use xlink:href="#icon-yinlehe">                   </use></svg><span> 音乐</span></a></li><li><a class="site-page child faa-parent animated-hover" href="/movies/"><svg class="menu_icon faa-tada" aria-hidden="true"><use xlink:href="#icon-film-full">                   </use></svg><span> 电影</span></a></li></ul></div><div class="menus_item"><a class="site-page faa-parent animated-hover" href="/comments/"><i class="fa-fw icon-TIFFANYSROOM_huaban"></i><svg class="menu_icon faa-tada" aria-hidden="true"><use xlink:href="#icon-TIFFANYSROOM_huaban"></use></svg><span> 留言板</span></a></div><div class="menus_item"><a class="site-page faa-parent animated-hover" href="/link/"><i class="fa-fw icon-feijifenxianglianjie"></i><svg class="menu_icon faa-tada" aria-hidden="true"><use xlink:href="#icon-feijifenxianglianjie"></use></svg><span> 友链</span></a></div><div class="menus_item"><a class="site-page faa-parent animated-hover" href="/about/"><i class="fa-fw icon-xihuan"></i><svg class="menu_icon faa-tada" aria-hidden="true"><use xlink:href="#icon-xihuan"></use></svg><span> 关于</span></a></div></div><div id="toggle-menu"><a class="site-page" href="javascript:void(0);"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">字节（内存）对齐</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2023-08-13T07:15:04.000Z" title="发表于 2023-08-13 15:15:04">2023-08-13</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2023-08-14T14:35:27.402Z" title="更新于 2023-08-14 22:35:27">2023-08-14</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/nginx%E5%86%85%E5%AD%98%E6%B1%A0/">nginx内存池</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">字数总计:</span><span class="word-count">2.9k</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">阅读时长:</span><span>10分钟</span></span><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="字节（内存）对齐"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h1 id="一、一般字节对齐"><a href="#一、一般字节对齐" class="headerlink" title="一、一般字节对齐"></a>一、一般字节对齐</h1><blockquote>
+<p>各个数据类型需要按照一定规则存放到存储单元中，相邻的数据并不一定是连续的紧紧挨在一起的，两个object之间可能会有空隙。这个空隙是padding。**<br>变量存的起始地址必须具备某种特性-‘对齐’，如4字节的int类型的起始地址，应该位于4字节的边界上，即起始地址能被4整除。</p>
+</blockquote>
+<p><strong>为什么需要字节对齐?</strong></p>
+<ul>
+<li>不同硬件平台的对存储空间的处理上存在不同。</li>
+<li>尽可能保证一次取数的完整性，以便提升访问数据性能。</li>
+</ul>
+<p><strong>一般规则</strong></p>
+<ul>
+<li>补充(自然对齐与非自然对齐)<ul>
+<li>自然对齐：对于标量类型，如char，int, 指针等等，其alignof等于sizeof，称作自然对齐。</li>
+<li>非自然对齐<pre><code><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> arr[<span class="number">10</span>];</span><br><span class="line"><span class="built_in">alignof</span>(arr) != <span class="built_in">sizeof</span>(arr);<span class="comment">//前者为4字节，后者为40字节</span></span><br></pre></td></tr></table></figure>
+</code></pre></li>
+</ul>
+</li>
+</ul>
+<ol>
+<li><strong>填充padding, 使得保证下一个数据类型T的起始地址能够整除alignof(T): 换句话说，起始位置必须是alignof(T)的整数倍。</strong></li>
+<li><strong>自然对齐下，结构体的alignment等于其成员中最大的alignment。（最大的alignment在不同机器同一个类型取值可能不同）</strong></li>
+<li><strong>结构体的sizeof等于其成员中最大的alignment的整数倍(这个通常是用来确定最后一个元素的字节数大小)。</strong></li>
+</ol>
+<h2 id="eg1"><a href="#eg1" class="headerlink" title="eg1"></a>eg1</h2><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">B</span> &#123;</span><br><span class="line"><span class="keyword">private</span>:</span><br><span class="line">	<span class="type">bool</span> c;<span class="number">1</span>-&gt;<span class="number">2</span></span><br><span class="line">	<span class="type">short</span> b;<span class="number">2</span></span><br><span class="line">	<span class="type">bool</span> a;<span class="number">1</span>-&gt;<span class="number">2</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p><code>32位：6字节；64位：6字节</code><br><strong>解释：满足每个元素的起始位置是当前元素的aligement的整数倍；满足结构体的sizeof等于其成员中最大的aligement的整数倍-这是里2的整数倍</strong></p>
+<h2 id="eg2"><a href="#eg2" class="headerlink" title="eg2"></a>eg2</h2><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">B</span> &#123;</span><br><span class="line"><span class="keyword">private</span>:</span><br><span class="line">	<span class="type">bool</span> c;<span class="number">1</span>-&gt;<span class="number">4</span></span><br><span class="line">	<span class="type">int</span> b;<span class="number">4</span></span><br><span class="line">	<span class="type">bool</span> a;<span class="number">1</span>-&gt;<span class="number">4</span> </span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p><code>32位：12字节，64位：12字节</code></p>
+<p><strong>解释：满足每个元素的起始位置是当前元素的aligement的整数倍；满足结构体的sizeof等于其成员中最大的aligement的整数倍-这是里4的整数倍</strong></p>
+<h2 id="eg3"><a href="#eg3" class="headerlink" title="eg3"></a>eg3</h2><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">B</span> &#123;</span><br><span class="line"><span class="keyword">private</span>:</span><br><span class="line">	<span class="type">bool</span> c;<span class="comment">//1-&gt;4  保证与后面的int类型数据对齐(保证数据下一个数据类型起始位置是对应数据类型的整数倍)</span></span><br><span class="line">	<span class="type">int</span> b;<span class="comment">//4 </span></span><br><span class="line">	<span class="type">bool</span> a;<span class="comment">//1-&gt;4 (1-&gt;8)</span></span><br><span class="line">	<span class="type">long</span> <span class="type">long</span> d;<span class="comment">//8</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p><code>32位：20字节；64位：24字节</code><br><strong>解释：满足每个元素的起始位置是当前元素的aligement的整数倍；满足结构体的sizeof等于其成员中最大的aligement的整数倍（32位 alignof(long long） = 4;64位 alignof(long long) = 8)</strong></p>
+<h1 id="二、-含有位域的字节对齐"><a href="#二、-含有位域的字节对齐" class="headerlink" title="二、 含有位域的字节对齐"></a>二、 含有位域的字节对齐</h1><ul>
+<li><p><strong>MSVC: 需要满足每个类型的起始位置都是对应类型的alignment的整数倍</strong></p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> <span class="title class_">bit_field</span> &#123;</span><br><span class="line">    <span class="type">short</span> a;<span class="comment">//MSVC: 2字节</span></span><br><span class="line">    <span class="type">char</span> b;<span class="comment">//MSVC: 需要字节对齐，保证下面int c的起始位置是alignof(int)的整数倍，需要填充1字节</span></span><br><span class="line">    <span class="type">int</span> c:<span class="number">1</span>;<span class="comment">//MSVC: 4字节，使用1位，剩余31位</span></span><br><span class="line">    <span class="type">char</span> d:<span class="number">4</span>;<span class="comment">//MSVC: 需要字节对齐，保证下面short e的起始位置是alignof(short)的整数倍, 需要填充1字节 使用4位，剩余12位</span></span><br><span class="line">    <span class="type">short</span> e:<span class="number">7</span>;<span class="comment">//MSVC: 2字节 </span></span><br><span class="line">    <span class="comment">//MAVC: 已经是alignof(int)的整数倍</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>clang|gcc: 在存储的时候不需要满足每个类型起始位置的是其对应的alignment的整数倍。只需要在最后补充字节保证结构体是最大alignment的整数倍</strong></p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> <span class="title class_">bit_field1</span> &#123;</span><br><span class="line">    <span class="type">short</span> a;<span class="comment">//clang|gcc: 2字节</span></span><br><span class="line">    <span class="type">char</span> b;<span class="comment">//clang|gcc: 1字节，不用字节对齐</span></span><br><span class="line">    <span class="type">int</span> c:<span class="number">1</span>;<span class="comment">//clang|gcc: 分配1字节，使用了1比特位，剩余7比特位。</span></span><br><span class="line">    <span class="type">char</span> d:<span class="number">4</span>;<span class="comment">//clang|gcc: 上述分配空间剩余的比特位能够存储下来4比特位，剩余3比特位</span></span><br><span class="line">    <span class="type">short</span> e:<span class="number">7</span>;<span class="comment">//clang|gcc：上述剩余的比特位不能装下7个比特位，因此开辟新的一字节来存储，使用7比特位，剩余1比特位</span></span><br><span class="line">    <span class="comment">//2 + 1 + 1 + 1 = 5字节，为了保证结构体大小是alignof(int)的整数倍，因此补充3字节对齐</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<h1 id="三、类的字节对齐"><a href="#三、类的字节对齐" class="headerlink" title="三、类的字节对齐"></a>三、类的字节对齐</h1><ul>
+<li><strong>空类：大小为1字节</strong></li>
+<li><strong>含有多个基类的子类的字节对齐：按照继承的顺序依次罗列出对应类的成员，然后按照字节对齐规则去计算</strong></li>
+</ul>
+<h2 id="eg4"><a href="#eg4" class="headerlink" title="eg4"></a>eg4</h2><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">A</span>&#123;&#125;;</span><br><span class="line"><span class="keyword">class</span> <span class="title class_">B</span>&#123;</span><br><span class="line"><span class="keyword">private</span>:</span><br><span class="line">    <span class="type">bool</span> c;<span class="comment">//1-&gt;4 保证是int的起始地址是alignof(int)的整数倍</span></span><br><span class="line">    <span class="type">int</span> a;<span class="comment">//4</span></span><br><span class="line">    <span class="type">bool</span> b;<span class="comment">//1-&gt;4 保证是最大alignof(int)的整数倍</span></span><br><span class="line">&#125;;</span><br><span class="line"><span class="comment">//按照上述一的方式进行分析即可：均为12字节</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">C</span>: <span class="keyword">public</span> A&#123;</span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> <span class="type">void</span> <span class="title">fun</span><span class="params">()</span> </span>= <span class="number">0</span>;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">//C类字节大小 = A的成员字节大小+C的成员字节大小(也需要遵循字节对齐原则)</span></span><br><span class="line"><span class="comment">//A的成员：没有成员就不算字节大小</span></span><br><span class="line"><span class="comment">//C的自己成员：虚函数表对应的vptr,32位：字节；64位：8字节</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//32位：4字节；64位：8字节</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">D</span>: <span class="keyword">public</span> B, <span class="keyword">public</span> C&#123;&#125;;</span><br><span class="line"><span class="comment">//D类字节大小 = B类成员大小+ C类成员大小(A类型成员大小+C类自身成员大小)</span></span><br><span class="line"><span class="comment">//按照顺序列出成员，按照字节对齐的方式来计算</span></span><br><span class="line">D&#123;	</span><br><span class="line">	<span class="comment">//B类的成员</span></span><br><span class="line">	<span class="type">bool</span> c;<span class="comment">//1-&gt;4</span></span><br><span class="line">	<span class="type">int</span> a;<span class="comment">//4</span></span><br><span class="line">	<span class="type">bool</span> b;</span><br><span class="line">		<span class="comment">//32位机器 保证下一个指针的地址是alignof(指针)整数倍：1-&gt;4</span></span><br><span class="line">		<span class="comment">//64位机器 保证下一个指针的地址是alignof(指针)整数倍：1-&gt;8</span></span><br><span class="line">	</span><br><span class="line">	<span class="function"><span class="keyword">virtual</span> <span class="type">void</span> <span class="title">fun</span><span class="params">()</span> </span>= <span class="number">0</span>;<span class="comment">//C类自己的</span></span><br><span class="line">		<span class="comment">//32位：4字节；64位：8字节</span></span><br><span class="line">	</span><br><span class="line">	<span class="comment">//当为32位机器时，大小为4 + 4 + 4 + 4 = 16字节 按照最大的alignof(指针)的整数倍对齐</span></span><br><span class="line">	<span class="comment">//当为64位机器时，大小为4 + 4 + 8 + 8 = 24字节 按照最大的alignof(指针)的整数倍对齐</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    cout &lt;&lt; <span class="built_in">sizeof</span>(A) &lt;&lt; endl;<span class="comment">// 1 1</span></span><br><span class="line">    cout &lt;&lt; <span class="built_in">sizeof</span>(B) &lt;&lt; endl;<span class="comment">// 12 12</span></span><br><span class="line">    cout &lt;&lt; <span class="built_in">sizeof</span>(C) &lt;&lt; endl;<span class="comment">// 4 8</span></span><br><span class="line">    cout &lt;&lt; <span class="built_in">sizeof</span>(D) &lt;&lt; endl;<span class="comment">// 16 24</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h1 id="三、静态成员变量不计算类所占内存的大小"><a href="#三、静态成员变量不计算类所占内存的大小" class="headerlink" title="三、静态成员变量不计算类所占内存的大小"></a>三、静态成员变量不计算类所占内存的大小</h1><ul>
+<li><strong>由于类的静态成员变量编译时被分配到静态/全局区，静态成员变量是属于类的，所有对象共有一份，不计入类的内存空间</strong></li>
+</ul>
+<h1 id="四、函数不占存储空间-虚函数之外"><a href="#四、函数不占存储空间-虚函数之外" class="headerlink" title="四、函数不占存储空间(虚函数之外)"></a>四、函数不占存储空间(虚函数之外)</h1><blockquote>
+<p>除了虚函数之外！！！并且不管虚函数有多少个，都只需要一个指针(维护虚函数表的指针)就够了！！！）<br>C++中成员函数和非成员函数都是放在代码区的，其中一般成员函数，友元函数，内联函数，以及静态成员函数都不计入类的存储空间</p>
+</blockquote>
+<p><strong>原因：编译系统中，数据和函数是分开存放的，函数放在代码区，数据主要放在栈区或者堆区，静态/全局区以及常量区), 实例化不同对象时，只给数据分配空间，各个对象调用函数时都能跳转到（内联函数除外）找到函数在代码区的入口执行。可以节省拷贝多份代码的空间.</strong></p>
+<h2 id="构造函数："><a href="#构造函数：" class="headerlink" title="构造函数："></a>构造函数：</h2><ul>
+<li>构造函数没有返回值，包括void.</li>
+<li>可以定义多个构造函数，称为构造函数的重载</li>
+<li>构造函数可以在对象创建时自动执行，无需显示调用</li>
+<li>构造函数可以初始化成员变量、分配资源等初始化操作</li>
+<li>默认构造函数是在没有显示定义构造函数时由编译器提供的</li>
+<li>如果定义了任何构造函数，编译器将不再提供默认构造函数</li>
+</ul>
+<h2 id="析构函数"><a href="#析构函数" class="headerlink" title="析构函数"></a>析构函数</h2><blockquote>
+<p>特殊的成员函数，用在对象销毁（生命周期结束）时执行清理操作，在销毁对象时自动被调用。（避免资源泄漏和内存泄漏等问题）<br>格式：~+类名<br>如果没有显示定义析构函数，编译器默认提供一个析构函数，但如果你定义了任何一个析构函数，编译器将不再提供默认析构函数。</p>
+</blockquote>
+<ul>
+<li>析构函数没有返回值，包括void</li>
+<li>可以定义一个析构函数，不能重载多个析构函数</li>
+<li>析构函数在对象销毁时自动执行，无需显示调用</li>
+<li>析构函数用于释放资源，清理操作等。</li>
+<li>默认析构函数是在没有显示定义析构函数时由编译器提供的</li>
+<li>如果定义了析构函数，编译器将不再提供默认的析构函数</li>
+</ul>
+<h2 id="虚函数"><a href="#虚函数" class="headerlink" title="虚函数"></a>虚函数</h2><blockquote>
+<p>虚函数是C++中实现多态性的关键机制之一。它允许在基类中声明一个函数为虚函数，然后在派生类中。重写（覆盖）这个虚函数。通过这种方式，当通过基类的指针或者引用调用虚函数时，实际上会根据对象的实际类型（运行时类型）来调用相应的派生类函数，实现了多态性。</p>
+</blockquote>
+<ul>
+<li>要声明一个虚函数，需要在虚函数声明前加上·virtual·关键字。派生类中如果要重写基类中的虚函数，需要在函数前也加上<code>virtual</code>关键字，并保持函数签名一致。        </li>
+<li>声明虚函数需要在函数声明前加上<code>virtual</code>关键字。</li>
+<li>派生类中重要基类的虚函数，需要保持函数签名一致，并在函数前也加上<code>virtual</code>关键字(这是可选的，但建议显示以提高代码可读性)</li>
+<li>通过基类的指针或引用调用虚函数时，会根据对象的实际类型来调用相应的派生类函数，这是运行时动态绑定的结果。</li>
+<li>虚函数允许我们在多态的情况下更灵活地处理对象，提高代码的可扩展性和可维护性。</li>
+</ul>
+<h2 id="友元函数："><a href="#友元函数：" class="headerlink" title="友元函数："></a>友元函数：</h2><ul>
+<li>在类内部中实现函数声明并且参数本类对象来进行传递</li>
+<li>在类外中实现对类的操作的操作逻辑（可以修改私有变量和调用私有函数！！！）</li>
+</ul>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Myclass</span> &#123;</span><br><span class="line">	<span class="function"><span class="type">void</span> <span class="title">print</span><span class="params">()</span> </span>&#123;</span><br><span class="line">		cout &lt;&lt; <span class="string">&quot;hello from Myclass!: a = &quot;</span> &lt;&lt; a &lt;&lt; endl;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="type">int</span> a;</span><br><span class="line">	<span class="comment">//声明一个友元函数</span></span><br><span class="line">	<span class="function"><span class="keyword">friend</span> <span class="type">void</span> <span class="title">print</span><span class="params">(Myclass&amp; obj)</span></span>;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">//定义友元函数</span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">print</span><span class="params">(Myclass&amp; obj)</span> </span>&#123;</span><br><span class="line">	cout &lt;&lt; <span class="string">&quot;hello form print() function!&quot;</span> &lt;&lt; endl;</span><br><span class="line">	obj.a = <span class="number">666</span>;<span class="comment">//修改对象的私有变量</span></span><br><span class="line">	obj.<span class="built_in">print</span>();<span class="comment">//调用对象的私有方法</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">	Myclass obj;</span><br><span class="line">	<span class="comment">//obj.print();私有成员函数不能直接访问</span></span><br><span class="line">	<span class="built_in">print</span>(obj);</span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="内联函数"><a href="#内联函数" class="headerlink" title="内联函数"></a>内联函数</h2><blockquote>
+<p>内联函数的逻辑会在编译时将函数内部的逻辑被复制到调用位置，直接进行计算，而不是通过函数调用<br>内联函数（声明和定义都要加inline）也是存放在代码区。</p>
+</blockquote>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">inline</span> <span class="type">int</span> <span class="title">add</span><span class="params">(<span class="type">int</span> a, <span class="type">int</span> b)</span> </span>&#123;</span><br><span class="line">	<span class="keyword">return</span> a + b;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">	cout &lt;&lt; <span class="built_in">add</span>(<span class="number">12</span>, <span class="number">34</span>) &lt;&lt; endl;</span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="静态成员函数"><a href="#静态成员函数" class="headerlink" title="静态成员函数"></a>静态成员函数</h2><ul>
+<li>定义在类内部的、不依赖于类的任何对象的函数。</li>
+<li>它们可以在不创建类对象的情况下调用，通常用于表示类的操作</li>
+</ul>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Myclass</span> &#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">	<span class="function"><span class="type">static</span> <span class="type">void</span> <span class="title">printMessage</span><span class="params">()</span> </span>&#123;</span><br><span class="line">		cout &lt;&lt; <span class="string">&quot;hello C++ world&quot;</span> &lt;&lt; endl;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">	Myclass::<span class="built_in">printMessage</span>();</span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h1 id="五、自定义对齐字节大小"><a href="#五、自定义对齐字节大小" class="headerlink" title="五、自定义对齐字节大小"></a>五、自定义对齐字节大小</h1><ul>
+<li>完全可以按照第字节对齐规则的方式去推出来！！！<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"></span><br><span class="line"><span class="meta"># <span class="keyword">pragma</span> pack(16)</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">A</span> &#123;</span><br><span class="line">    <span class="type">int</span> a;</span><br><span class="line">    <span class="type">double</span> b;</span><br><span class="line">    <span class="type">char</span> c;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    cout &lt;&lt; <span class="built_in">sizeof</span>(A) &lt;&lt; endl;</span><br><span class="line">    <span class="comment">//对齐系数：       1    4 + 8 + 1 = 13</span></span><br><span class="line">    <span class="comment">//对齐系数:        2    4 + 8 + 2 = 14</span></span><br><span class="line">    <span class="comment">//x86默认对齐系数：4    4 + 8 + 4 = 16</span></span><br><span class="line">    <span class="comment">//x64默认对齐系数：8    8 + 8 + 8 = 24</span></span><br><span class="line">    <span class="comment">//对齐系数：       16   8 + 8 + 8 = 24 </span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+</article><div class="post-copyright"><div class="post-copyright__title"><span class="post-copyright-info"><h>字节（内存）对齐</h></span></div><div class="post-copyright__type"><span class="post-copyright-info"><a href="http://kuroko.love/2023/08/13/%E8%AE%A1%E7%AE%97%E5%86%85%E5%AD%98%E5%A4%A7%E5%B0%8F/">http://kuroko.love/2023/08/13/%E8%AE%A1%E7%AE%97%E5%86%85%E5%AD%98%E5%A4%A7%E5%B0%8F/</a></span></div><div class="post-copyright-m"><div class="post-copyright-m-info"><div class="post-copyright-a"><h>作者</h><div class="post-copyright-cc-info"><h>Horn JoJo</h></div></div><div class="post-copyright-c"><h>发布于</h><div class="post-copyright-cc-info"><h>2023-08-13</h></div></div><div class="post-copyright-u"><h>更新于</h><div class="post-copyright-cc-info"><h>2023-08-14</h></div></div><div class="post-copyright-c"><h>许可协议</h><div class="post-copyright-cc-info"><a class="icon" rel="noopener" target="_blank" title="Creative Commons" href="https://creativecommons.org/"><i class="fab fa-creative-commons"></i></a><a rel="noopener" target="_blank" title="LOVE BY-NC-SA 4.0" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">LOVE BY-NC-SA 4.0</a></div></div></div></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E5%AD%97%E8%8A%82%E5%AF%B9%E9%BD%90/">字节对齐</a></div><div class="post_share"><div class="social-share" data-image="https://picbed.kuroko.love/blog_background/%E9%A3%9F%E8%9C%82%E6%93%8D%E7%A5%882.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2023/08/15/%E6%9F%94%E6%80%A7%E6%95%B0%E7%BB%84/" title="柔性数组"><img class="cover" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="https://picbed.kuroko.love/blog_background/%E7%99%BD%E4%BA%95%E9%BB%91%E5%AD%90.png" onerror="onerror=null;src='/img/404.jpg'" alt="cover of previous post"><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">柔性数组</div></div></a></div><div class="next-post pull-right"><a href="/2023/08/08/hexo%E5%8D%9A%E5%AE%A2%E6%90%AD%E5%BB%BA%E6%95%99%E7%A8%8B-1/" title="hexo博客搭建教程(1)"><img class="cover" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="https://picbed.kuroko.love/blog_background/10032.png" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">hexo博客搭建教程(1)</div></div></a></div></nav></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/asserts/kuroko.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">Horn JoJo</div><div class="author-info__description"></div></div><div class="card-info-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">18</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">10</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">8</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://Horn-JoJo.github.io"><i class="fab fa-github"></i><span>kuroko的小家</span></a><div class="card-info-social-icons is-center"><a class="social-icon faa-parent animated-hover" href="https://github.com/Horn-JoJo/" target="_blank" title="Github"><svg class="social_icon faa-tada" aria-hidden="true"><use xlink:href="#icon-Gitshezhi"></use></svg></a><a class="social-icon faa-parent animated-hover" href="https://leetcode.cn/u/jann_horn/" target="_blank" title="Leetcode"><svg class="social_icon faa-tada" aria-hidden="true"><use xlink:href="#icon-leetcode"></use></svg></a><a class="social-icon faa-parent animated-hover" href="https://b23.tv/aqCcTQk" target="_blank" title="Blibili"><svg class="social_icon faa-tada" aria-hidden="true"><use xlink:href="#icon-bilibili"></use></svg></a><a class="social-icon faa-parent animated-hover" href="https://res.abeim.cn/api/qq/?qq=1494484196" target="_blank" title="QQ"><svg class="social_icon faa-tada" aria-hidden="true"><use xlink:href="#icon-QQ"></use></svg></a><a class="social-icon faa-parent animated-hover" href="mailto:1494484196@qq.com" target="_blank" title="邮件"><svg class="social_icon faa-tada" aria-hidden="true"><use xlink:href="#icon-youjian"></use></svg></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><a class="faa-parent animated-hover"><svg class="faa-tada icon" style="height:25px;width:25px;fill:currentColor;position:relative;top:5px" aria-hidden="true"><use xlink:href="#icon-gonggao"></use></svg></a><span>公告栏</span></div><div class="announcement_content">欢迎来到我的博客</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%B8%80%E3%80%81%E4%B8%80%E8%88%AC%E5%AD%97%E8%8A%82%E5%AF%B9%E9%BD%90"><span class="toc-text">一、一般字节对齐</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#eg1"><span class="toc-text">eg1</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#eg2"><span class="toc-text">eg2</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#eg3"><span class="toc-text">eg3</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%BA%8C%E3%80%81-%E5%90%AB%E6%9C%89%E4%BD%8D%E5%9F%9F%E7%9A%84%E5%AD%97%E8%8A%82%E5%AF%B9%E9%BD%90"><span class="toc-text">二、 含有位域的字节对齐</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%B8%89%E3%80%81%E7%B1%BB%E7%9A%84%E5%AD%97%E8%8A%82%E5%AF%B9%E9%BD%90"><span class="toc-text">三、类的字节对齐</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#eg4"><span class="toc-text">eg4</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%B8%89%E3%80%81%E9%9D%99%E6%80%81%E6%88%90%E5%91%98%E5%8F%98%E9%87%8F%E4%B8%8D%E8%AE%A1%E7%AE%97%E7%B1%BB%E6%89%80%E5%8D%A0%E5%86%85%E5%AD%98%E7%9A%84%E5%A4%A7%E5%B0%8F"><span class="toc-text">三、静态成员变量不计算类所占内存的大小</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%9B%9B%E3%80%81%E5%87%BD%E6%95%B0%E4%B8%8D%E5%8D%A0%E5%AD%98%E5%82%A8%E7%A9%BA%E9%97%B4-%E8%99%9A%E5%87%BD%E6%95%B0%E4%B9%8B%E5%A4%96"><span class="toc-text">四、函数不占存储空间(虚函数之外)</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%9E%84%E9%80%A0%E5%87%BD%E6%95%B0%EF%BC%9A"><span class="toc-text">构造函数：</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%9E%90%E6%9E%84%E5%87%BD%E6%95%B0"><span class="toc-text">析构函数</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%99%9A%E5%87%BD%E6%95%B0"><span class="toc-text">虚函数</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8F%8B%E5%85%83%E5%87%BD%E6%95%B0%EF%BC%9A"><span class="toc-text">友元函数：</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%86%85%E8%81%94%E5%87%BD%E6%95%B0"><span class="toc-text">内联函数</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%9D%99%E6%80%81%E6%88%90%E5%91%98%E5%87%BD%E6%95%B0"><span class="toc-text">静态成员函数</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%BA%94%E3%80%81%E8%87%AA%E5%AE%9A%E4%B9%89%E5%AF%B9%E9%BD%90%E5%AD%97%E8%8A%82%E5%A4%A7%E5%B0%8F"><span class="toc-text">五、自定义对齐字节大小</span></a></li></ol></div></div></div></div></main><footer id="footer"><div id="footer-wrap"><div class="copyright">&copy;2023 By Horn JoJo</div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="translateLink" type="button" title="简繁转换">繁</button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="/js/tw_cn.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox/fancybox.umd.min.js"></script><script src="https://cdn.jsdelivr.net/npm/vanilla-lazyload/dist/lazyload.iife.min.js"></script><script>function panguFn () {
+  if (typeof pangu === 'object') pangu.autoSpacingPage()
+  else {
+    getScript('https://cdn.jsdelivr.net/npm/pangu/dist/browser/pangu.min.js')
+      .then(() => {
+        pangu.autoSpacingPage()
+      })
+  }
+}
+
+function panguInit () {
+  if (false){
+    GLOBAL_CONFIG_SITE.isPost && panguFn()
+  } else {
+    panguFn()
+  }
+}
+
+document.addEventListener('DOMContentLoaded', panguInit)</script><div class="js-pjax"></div><script defer src="/js/light.js"></script><canvas id="universe"></canvas><script defer src="/js/universe.js"></script><script defer src="/js/cursor.js"></script><script async src="//at.alicdn.com/t/c/font_4183657_j03j2wub0ye.js"></script><script src="https://cdn.jsdelivr.net/gh/wallleap/cdn/js/love.js"></script><script defer src="/js/toggleImage.js"></script><script defer src="/js/life.js"></script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aplayer/dist/APlayer.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/aplayer/dist/APlayer.min.js"></script><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/metingjs/dist/Meting.min.js"></script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><span id="loading-status"></span><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="is-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据库加载中</span></div><div class="search-wrap"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div><hr/><div class="no-result" id="local-search-results"></div><div id="local-search-stats-wrap"></div></div></div><div id="search-mask"></div><script src="/js/search/local-search.js"></script></div></div><!-- hexo injector body_end start --> <script data-pjax>if(document.getElementById('recent-posts') && (location.pathname ==='/'|| '/' ==='all')){
+    var parent = document.getElementById('recent-posts');
+    var child = '<div class="recent-post-item" style="width:100%;height: auto"><div id="catalog_magnet"><div class="magnet_item"><a class="magnet_link" href="http://kuroko.love/categories/C/"><div class="magnet_link_context" style=""><span style="font-weight:500;flex:1">🎮 C++学习 (6)</span><span style="padding:0px 4px;border-radius: 8px;"><i class="fas fa-arrow-circle-right"></i></span></div></a></div><div class="magnet_item" style="visibility: hidden"></div><a class="magnet_link_more"  href="http://kuroko.love/categories" style="flex:1;text-align: center;margin-bottom: 10px;">查看更多...</a></div></div>';
+    console.log('已挂载magnet')
+    parent.insertAdjacentHTML("afterbegin",child)}
+     </script><style>#catalog_magnet{flex-wrap: wrap;display: flex;width:100%;justify-content:space-between;padding: 10px 10px 0 10px;align-content: flex-start;}.magnet_item{flex-basis: calc(50% - 5px);background: #f2f2f2;margin-bottom: 10px;border-radius: 8px;transition: all 0.2s ease-in-out;}.magnet_item:hover{background: #69e8f2}.magnet_link_more{color:#555}.magnet_link{color:black}.magnet_link:hover{color:white}@media screen and (max-width: 600px) {.magnet_item {flex-basis: 100%;}}.magnet_link_context{display:flex;padding: 10px;font-size:16px;transition: all 0.2s ease-in-out;}.magnet_link_context:hover{padding: 10px 20px;}</style>
+    <style></style><script data-pjax>
+  function butterfly_clock_anzhiyu_injector_config(){
+    var parent_div_git = document.getElementsByClassName('sticky_layout')[0];
+    var item_html = '<div class="card-widget card-clock"><div class="card-glass"><div class="card-background"><div class="card-content"><div id="hexo_electric_clock"><img class="entered loading" id="card-clock-loading" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="https://cdn.cbd.int/hexo-butterfly-clock-anzhiyu/lib/loading.gif" style="height: 120px; width: 100%;" data-ll-status="loading"/></div></div></div></div></div>';
+    console.log('已挂载butterfly_clock_anzhiyu')
+    if(parent_div_git) {
+      parent_div_git.insertAdjacentHTML("afterbegin",item_html)
+    }
+  }
+  var elist = 'null'.split(',');
+  var cpage = location.pathname;
+  var epage = '/';
+  var qweather_key = 'b16a1fa0e63c46a4b8f28abfb06ae3fe';
+  var gaud_map_key = 'e2b04289e870b005374ee030148d64fd&s=rsv3';
+  var baidu_ak_key = 'undefined';
+  var flag = 0;
+  var clock_rectangle = '113.34532,23.15624';
+  var clock_default_rectangle_enable = 'true';
+
+  for (var i=0;i<elist.length;i++){
+    if (cpage.includes(elist[i])){
+      flag++;
+    }
+  }
+
+  if ((epage ==='all')&&(flag == 0)){
+    butterfly_clock_anzhiyu_injector_config();
+  }
+  else if (epage === cpage){
+    butterfly_clock_anzhiyu_injector_config();
+  }
+  </script><script src="https://widget.qweather.net/simple/static/js/he-simple-common.js?v=2.0"></script><script data-pjax src="https://cdn.cbd.int/hexo-butterfly-clock-anzhiyu/lib/clock.min.js"></script><script data-pjax>
+  function butterfly_footer_beautify_injector_config(){
+    var parent_div_git = document.getElementById('footer-wrap');
+    var item_html = '<div id="workboard"></div><p id="ghbdages"><a class="github-badge" target="_blank" href="https://hexo.io/" style="margin-inline:5px" data-title="博客框架为Hexo_v6.3.0" title=""><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="https://img.shields.io/badge/Frame-Hexo-blue?style=flat&amp;logo=hexo" alt=""/></a><a class="github-badge" target="_blank" href="https://butterfly.js.org/" style="margin-inline:5px" data-title="主题版本Butterfly_v4.9.0" title=""><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="https://img.shields.io/badge/Theme-Butterfly-6513df?style=flat&amp;logo=bitdefender" alt=""/></a><a class="github-badge" target="_blank" href="https://vercel.com/" style="margin-inline:5px" data-title="本站采用多线部署，主线路托管于Vercel" title=""><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="https://img.shields.io/badge/Hosted-Vercel-brightgreen?style=flat&amp;logo=Vercel" alt=""/></a><a class="github-badge" target="_blank" href="https://github.com/" style="margin-inline:5px" data-title="本站项目由Github托管" title=""><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="https://img.shields.io/badge/Source-Github-d021d6?style=flat&amp;logo=GitHub" alt=""/></a></p>';
+    console.log('已挂载butterfly_footer_beautify')
+    parent_div_git.insertAdjacentHTML("beforeend",item_html)
+    }
+  var elist = 'null'.split(',');
+  var cpage = location.pathname;
+  var epage = 'all';
+  var flag = 0;
+
+  for (var i=0;i<elist.length;i++){
+    if (cpage.includes(elist[i])){
+      flag++;
+    }
+  }
+
+  if ((epage ==='all')&&(flag == 0)){
+    butterfly_footer_beautify_injector_config();
+  }
+  else if (epage === cpage){
+    butterfly_footer_beautify_injector_config();
+  }
+  </script><script async src="/js/runtime.js"></script><script data-pjax>
+  function butterfly_swiper_injector_config(){
+    var parent_div_git = document.getElementById('recent-posts');
+    var item_html = '<div class="recent-post-item" style="height: auto;width: 100%"><div class="blog-slider swiper-container-fade swiper-container-horizontal" id="swiper_container"><div class="blog-slider__wrp swiper-wrapper" style="transition-duration: 0ms;"><div class="blog-slider__item swiper-slide" style="width: 750px; opacity: 1; transform: translate3d(0px, 0px, 0px); transition-duration: 0ms;"><a class="blog-slider__img" href="2023/08/16/目标清单/" alt=""><img width="48" height="48" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="https://picbed.kuroko.love/blog_background/%E4%B8%BB%E8%A7%92%E5%9B%A22.jpg" alt="" onerror="this.src=https://unpkg.zhimg.com/akilar-candyassets/image/loading.gif; this.onerror = null;"/></a><div class="blog-slider__content"><span class="blog-slider__code">2023-08-16</span><a class="blog-slider__title" href="2023/08/16/目标清单/" alt="">成长日记</a><div class="blog-slider__text">再怎么看我也不知道怎么描述它的啦！</div><a class="blog-slider__button" href="2023/08/16/目标清单/" alt="">详情   </a></div></div></div><div class="blog-slider__pagination swiper-pagination-clickable swiper-pagination-bullets"></div></div></div>';
+    console.log('已挂载butterfly_swiper')
+    parent_div_git.insertAdjacentHTML("afterbegin",item_html)
+    }
+  var elist = 'undefined'.split(',');
+  var cpage = location.pathname;
+  var epage = '/';
+  var flag = 0;
+
+  for (var i=0;i<elist.length;i++){
+    if (cpage.includes(elist[i])){
+      flag++;
+    }
+  }
+
+  if ((epage ==='all')&&(flag == 0)){
+    butterfly_swiper_injector_config();
+  }
+  else if (epage === cpage){
+    butterfly_swiper_injector_config();
+  }
+  </script><script defer src="https://npm.elemecdn.com/hexo-butterfly-swiper/lib/swiper.min.js"></script><script defer data-pjax src="https://npm.elemecdn.com/hexo-butterfly-swiper/lib/swiper_init.js"></script><script async src="//at.alicdn.com/t/font_2032782_8d5kxvn09md.js"></script><div class="js-pjax"><script async="async">var arr = document.getElementsByClassName('recent-post-item');
+for(var i = 0;i<arr.length;i++){
+    arr[i].classList.add('wow');
+    arr[i].classList.add('animate__bounceInDown');
+    arr[i].setAttribute('data-wow-duration', '2s');
+    arr[i].setAttribute('data-wow-delay', '1s');
+    arr[i].setAttribute('data-wow-offset', '100');
+    arr[i].setAttribute('data-wow-iteration', '2');
+  }</script><script async="async">var arr = document.getElementsByClassName('card-widget');
+for(var i = 0;i<arr.length;i++){
+    arr[i].classList.add('wow');
+    arr[i].classList.add('animate__zoomIn');
+    arr[i].setAttribute('data-wow-duration', '');
+    arr[i].setAttribute('data-wow-delay', '');
+    arr[i].setAttribute('data-wow-offset', '');
+    arr[i].setAttribute('data-wow-iteration', '');
+  }</script><script async="async">var arr = document.getElementsByClassName('pagination');
+for(var i = 0;i<arr.length;i++){
+    arr[i].classList.add('wow');
+    arr[i].classList.add('animate__lightSpeedInRight');
+    arr[i].setAttribute('data-wow-duration', '');
+    arr[i].setAttribute('data-wow-delay', '');
+    arr[i].setAttribute('data-wow-offset', '');
+    arr[i].setAttribute('data-wow-iteration', '');
+  }</script></div><script defer src="https://npm.elemecdn.com/hexo-butterfly-wowjs/lib/wow.min.js"></script><script defer src="https://npm.elemecdn.com/hexo-butterfly-wowjs/lib/wow_init.js"></script><script data-pjax src="https://npm.elemecdn.com/hexo-filter-gitcalendar/lib/gitcalendar.js"></script><script data-pjax>
+  function gitcalendar_injector_config(){
+      var parent_div_git = document.getElementById('gitZone');
+      var item_html = '<div class="recent-post-item" id="gitcalendarBar" style="width:100%;height:auto;padding:10px;"><style>#git_container{min-height: 280px}@media screen and (max-width:650px) {#git_container{min-height: 0px}}</style><div id="git_loading" style="width:10%;height:100%;margin:0 auto;display: block;"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 50 50" style="enable-background:new 0 0 50 50" xml:space="preserve"><path fill="#d0d0d0" d="M25.251,6.461c-10.318,0-18.683,8.365-18.683,18.683h4.068c0-8.071,6.543-14.615,14.615-14.615V6.461z" transform="rotate(275.098 25 25)"><animatetransform attributeType="xml" attributeName="transform" type="rotate" from="0 25 25" to="360 25 25" dur="0.6s" repeatCount="indefinite"></animatetransform></path></svg><style>#git_container{display: none;}</style></div><div id="git_container"></div></div>';
+      parent_div_git.insertAdjacentHTML("afterbegin",item_html)
+      console.log('已挂载gitcalendar')
+      }
+
+    if( document.getElementById('gitZone') && (location.pathname ==='/about/'|| '/about/' ==='all')){
+        gitcalendar_injector_config()
+        GitCalendarInit("https://gitcalendar.kuroko.love/api?Horn-JoJo",['#d9e0df', '#c6e0dc', '#a8dcd4', '#9adcd2', '#89ded1', '#77e0d0', '#5fdecb', '#47dcc6', '#39dcc3', '#1fdabe', '#00dab9'],'Horn-JoJo')
+    }
+  </script><!-- hexo injector body_end end --></body></html>
